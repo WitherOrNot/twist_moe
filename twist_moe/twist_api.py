@@ -6,8 +6,8 @@ import code
 import sys
 from tempfile import TemporaryFile
 
-API_KEY = "1rj2vRtegS8Y60B3w3qNZm5T2Q0TN2NR"
-AES_KEY = b"LXgIVP&PorO68Rq7dTx8N^lP!Fa5sGJ^*XK"
+API_KEY = "0df14814b9e590a1f26d3071a4ed7974"
+AES_KEY = b"267041df55ca2b36f2e322d05ee2c9cf"
 
 def api_request(url):
     r = requests.get(
@@ -75,5 +75,6 @@ def stream(slug, ep_number):
     return retcode == 4
 
 if __name__ == "__main__":
-    # download("kobayashi-san-chi-no-maid-dragon", [1])
-    stream("kobayashi-san-chi-no-maid-dragon", 6)
+    print(get_source("kono-subarashii-sekai-ni-shukufuku-wo", 1))
+    download("kono-subarashii-sekai-ni-shukufuku-wo", 1)
+    # stream("kobayashi-san-chi-no-maid-dragon", 6)
