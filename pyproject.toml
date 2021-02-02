@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "twist_moe"
-version = "1.0.1"
+version = "1.0.3"
 description = "twist.moe client"
 authors = ["witherornot <damemem@gmail.com>"]
 
