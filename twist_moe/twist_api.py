@@ -48,7 +48,7 @@ def get_source(slug, ep_number):
     sources = api_request(f"/anime/{slug}/sources")
     encrypted_url = list(filter(lambda ep: ep["number"] == ep_number, sources))[0]["source"]
     url = decrypt(AES_KEY, encrypted_url)
-    return f"https://twistcdn.bunny.sh{url}"
+    return "https://cdn.twist.moe" + url
 
 def get_num_episodes(slug):
     sources = api_request(f"/anime/{slug}/sources")
