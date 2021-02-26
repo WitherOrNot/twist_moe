@@ -48,7 +48,9 @@ def get_source(slug, ep_number):
     sources = api_request(f"/anime/{slug}/sources")
     encrypted_url = list(filter(lambda ep: ep["number"] == ep_number, sources))[0]["source"]
     url = decrypt(AES_KEY, encrypted_url)
-    return "https://cdn.twist.moe" + url
+    src_url = "https://cdn.twist.moe" + url
+    
+    return src_url
 
 def get_num_episodes(slug):
     sources = api_request(f"/anime/{slug}/sources")
@@ -61,13 +63,15 @@ def download(slug, ep, out=None):
     if not os.path.exists(slug):
         os.mkdir(slug)
     
-    p = subprocess.Popen(["wget", "-c", "--retry-connrefused", "--tries=0", "--timeout=2", "--wait=1", "--header=Referer: https://twist.moe/", "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36", "-v", url, "-O", out])
-    retcode = p.wait()
-    
-    return retcode
+    retcode = 1
+    while retcode != 0:
+        p = subprocess.Popen(["wget", "-c", "--retry-connrefused", "--tries=0", "--timeout=2", "--wait=1", "--header=Referer: https://twist.moe/", "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36", "-v", url, "-O", out])
+        retcode = p.wait()
+        
+        if retcode == 8:
+            url = url.replace("https://cdn", "https://air-cdn")
 
 def stream(slug, ep_number):
-    killed_by_ctrl_c = False
     url = get_source(slug, ep_number)
     p = subprocess.Popen(["mpv", "--http-header-fields=Referer: https://twist.moe/", url], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     retcode = p.wait()

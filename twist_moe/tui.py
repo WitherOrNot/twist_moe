@@ -87,10 +87,12 @@ def start_stream(screen, slug, ep_start, num_episodes):
         screen.refresh()
         c = chr(screen.getch())
 
-        if c in ("n", "N") or c in ("\n", curses.KEY_ENTER):
-            i += 1
-        elif c in ("b", "B"):
+        if c in ("b", "B"):
             return
+        elif c in ("y", "Y"):
+            pass
+        else:
+            i += 1
 
 def tui_main(screen):
     curses.curs_set(0)
