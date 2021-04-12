@@ -1,14 +1,13 @@
 [tool.poetry]
 name = "twist_moe"
-version = "1.0.5"
+version = "1.1.0"
 description = "twist.moe client"
 authors = ["witherornot <damemem@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.6"
-tqdm = "^4.53.0"
-requests = "^2.25.0"
-pycrypto = "2.6.1"
+requests = "*"
+pycryptodome = "*"
 
 [tool.poetry.scripts]
 twist = 'twist_moe.tui:main'

@@ -44,11 +44,13 @@ def get_title_translations():
 
     return translation
 
-def get_source(slug, ep_number):
+def get_source(slug, ep_number, use_aircdn=False):
     sources = api_request(f"/anime/{slug}/sources")
     encrypted_url = list(filter(lambda ep: ep["number"] == ep_number, sources))[0]["source"]
     url = decrypt(AES_KEY, encrypted_url)
-    src_url = "https://air-cdn.twist.moe" + url
+    
+    cdn = "air-" if use_aircdn else ""
+    src_url = f"https://{cdn}cdn.twist.moe" + url
     
     return src_url
 

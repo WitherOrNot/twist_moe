@@ -177,6 +177,7 @@ def main():
     parser.add_argument("--download", "-d", nargs='*', help="Download from twist.moe url")
     parser.add_argument("--stream", "-s", nargs='*', help="Stream from twist.moe url with mplayer")
     parser.add_argument("--download-show", "-w", nargs='*', help="Download all episodes of show from twist.moe url")
+    parser.add_argument("--use-aircdn", "-C", action="store_true", default=False, help="Use alternate CDN, for when anime may not be available on main CDN.")
     parsed = parser.parse_args()
     
     slug_to_show = {j: i for i, j in get_show_to_slug().items()}
