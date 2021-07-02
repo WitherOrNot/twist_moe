@@ -58,9 +58,9 @@ def get_num_episodes(slug):
     sources = api_request(f"/anime/{slug}/sources")
     return len(sources)
 
-def download(slug, ep, out=None):
+def download(slug, ep, out=None, use_aircdn=False):
     out = out if out else f"{slug}/{slug}-{ep}.mp4"
-    url = get_source(slug, ep)
+    url = get_source(slug, ep, use_aircdn=use_aircdn)
     
     if not os.path.exists(slug):
         os.mkdir(slug)
@@ -69,8 +69,8 @@ def download(slug, ep, out=None):
     retcode = p.wait()
     return retcode
 
-def stream(slug, ep_number):
-    url = get_source(slug, ep_number)
+def stream(slug, ep_number, use_aircdn=False):
+    url = get_source(slug, ep_number, use_aircdn=use_aircdn)
     p = subprocess.Popen(["mpv", "--http-header-fields=Referer: https://twist.moe/", url], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     retcode = p.wait()
 

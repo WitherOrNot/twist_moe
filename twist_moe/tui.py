@@ -7,6 +7,8 @@ import time
 import os
 from .twist_api import download, stream, get_num_episodes, get_show_to_slug, get_title_translations
 
+use_aircdn = False
+
 def init_window():
     screen = curses.initscr()
     curses.noecho()
@@ -21,12 +23,13 @@ def exit_window(screen):
     curses.endwin()
 
 def parse_twist_url(url, with_ep=True):
+    url_after = url.split("/a/")[1]
     if with_ep:
-        slug, ep_number = tuple(url[20:].split("/"))
+        slug, ep_number = tuple(url_after.split("/"))
         ep_number = int(ep_number)
         return slug, ep_number
     else:
-        slug = url[20:].split("/")[0]
+        slug = url_after.split("/")[0]
         return slug
 
 def stream_menu(screen, show, slug, num_episodes):
@@ -60,7 +63,7 @@ def stream_menu(screen, show, slug, num_episodes):
             if selected_index > 0:
                 selected_index -= 1
             elif shift > 0:
-                shift -= 1 
+                shift -= 1
         elif c == curses.KEY_DOWN:
             if selected_index < num_lines - 1:
                 selected_index += 1
@@ -70,6 +73,8 @@ def stream_menu(screen, show, slug, num_episodes):
             start_stream(screen, slug, selected_index + 1 + shift, num_episodes)
         elif chr(c) in ["b", "B"]:
             return False
+        elif c == 3:
+            quit()
 
         screen.refresh()
 
@@ -79,18 +84,20 @@ def start_stream(screen, slug, ep_start, num_episodes):
         screen.clear()
         screen.addstr(0, 0, f"Playing episode {i}, press Ctrl+C to quit\n")
         screen.refresh()
-        if stream(slug, i):
+        if stream(slug, i, use_aircdn=use_aircdn):
             quit()
         
         time.sleep(1)
         screen.addstr(1, 0, "Rewatch? (y/n/b) [n]")
         screen.refresh()
-        c = chr(screen.getch())
+        c = screen.getch()
 
-        if c in ("b", "B"):
+        if chr(c) in ("b", "B"):
             return
-        elif c in ("y", "Y"):
+        elif chr(c) in ("y", "Y"):
             pass
+        elif c == 3:
+            quit()
         else:
             i += 1
 
@@ -110,7 +117,7 @@ def tui_main(screen):
     while True:
         shows = translations.keys() if switch_lang else translations.values()
         screen.clear()
-        screen.addstr(0, 0, "Search: "+search_term, curses.A_BOLD)
+        screen.addstr(0, 0, f"Search: "+search_term, curses.A_BOLD)
         max_index = shift+ymax-2
         matches = list(filter(lambda i: search_term.lower() in i.lower(), shows))
         visible_matches = list(enumerate(matches[shift:max_index+1]))
@@ -144,7 +151,7 @@ def tui_main(screen):
             if selected_index > 0:
                 selected_index -= 1
             elif shift > 0:
-                shift -= 1 
+                shift -= 1
         elif c == curses.KEY_DOWN:
             if selected_index < max_selection:
                 selected_index += 1
@@ -162,8 +169,10 @@ def tui_main(screen):
             num_episodes = get_num_episodes(slug)
             if stream_menu(screen, show, slug, num_episodes):
                 break
-        elif c == curses.KEY_BACKSPACE:
+        elif c in (8, curses.KEY_BACKSPACE):
             search_term = search_term[:-1]
+        elif c == 3:
+            quit()
         elif chr(c) == "\t":
             _, show = visible_matches[selected_index]
             search_term = show
@@ -173,16 +182,20 @@ def tui_main(screen):
         screen.refresh()
 
 def main():
+    global use_aircdn
+    
     parser = argparse.ArgumentParser(description='Download/Stream anime from twist.moe')
     parser.add_argument("--download", "-d", nargs='*', help="Download from twist.moe url")
-    parser.add_argument("--stream", "-s", nargs='*', help="Stream from twist.moe url with mplayer")
+    parser.add_argument("--stream", "-s", nargs='*', help="Stream from twist.moe url with mpv")
     parser.add_argument("--download-show", "-w", nargs='*', help="Download all episodes of show from twist.moe url")
     parser.add_argument("--use-aircdn", "-C", action="store_true", default=False, help="Use alternate CDN, for when anime may not be available on main CDN.")
+    
     parsed = parser.parse_args()
     
+    use_aircdn = parsed.use_aircdn
     slug_to_show = {j: i for i, j in get_show_to_slug().items()}
     
-    if len(sys.argv) == 1:
+    if len(sys.argv) < 3:
         screen = init_window()
         atexit.register(exit_window, screen)
         tui_main(screen)
@@ -192,13 +205,13 @@ def main():
                 slug, ep = parse_twist_url(url)
                 show = slug_to_show[slug]
                 print(f"Downloading episode {ep} of {show} to {slug}/{slug}-{ep}.mp4")
-                download(slug, ep)
+                download(slug, ep, use_aircdn=use_aircdn)
         if parsed.stream:
             for url in parsed.stream:
                 slug, ep = parse_twist_url(url)
                 show = slug_to_show[slug]
                 print(f"Streaming episode {ep} of {show}...")
-                stream(slug, ep)
+                stream(slug, ep, use_aircdn=use_aircdn)
         if parsed.download_show:
             for url in parsed.download_show:
                 slug = parse_twist_url(url, with_ep=False)
@@ -207,7 +220,7 @@ def main():
                 
                 for i in range(1, num_eps+1):
                     print(f"Downloading episode {i} of {show} to {slug}/{slug}-{i}.mp4")
-                    download(slug, i)
+                    download(slug, i, use_aircdn=use_aircdn)
 
 if __name__ == "__main__":
     main()
