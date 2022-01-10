@@ -26,7 +26,7 @@ def parse_twist_url(url, with_ep=True):
     url_after = url.split("/a/")[1]
     if with_ep:
         slug, ep_number = tuple(url_after.split("/"))
-        ep_number = int(ep_number)
+        ep_number = int(ep_number) if ep_number != "first" else 1
         return slug, ep_number
     else:
         slug = url_after.split("/")[0]
@@ -188,11 +188,11 @@ def main():
     parser.add_argument("--download", "-d", nargs='*', help="Download from twist.moe url")
     parser.add_argument("--stream", "-s", nargs='*', help="Stream from twist.moe url with mpv")
     parser.add_argument("--download-show", "-w", nargs='*', help="Download all episodes of show from twist.moe url")
-    parser.add_argument("--use-aircdn", "-C", action="store_true", default=False, help="Use alternate CDN, for when anime may not be available on main CDN.")
+    parser.add_argument("--use-cdn", "-C", action="store_false", default=True, help="Use main CDN, for when anime may not be available on air CDN.")
     
     parsed = parser.parse_args()
     
-    use_aircdn = parsed.use_aircdn
+    use_aircdn = parsed.use_cdn
     slug_to_show = {j: i for i, j in get_show_to_slug().items()}
     
     if len(sys.argv) < 3:

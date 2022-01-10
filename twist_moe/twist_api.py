@@ -11,7 +11,7 @@ AES_KEY = b"267041df55ca2b36f2e322d05ee2c9cf"
 
 def api_request(url):
     r = requests.get(
-        f"https://twist.moe/api{url}",
+        f"https://api.twist.moe/api{url}",
         headers = {
             "x-access-token": API_KEY
         }
